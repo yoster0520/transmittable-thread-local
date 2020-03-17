@@ -1,4 +1,4 @@
-# 📌 Transmittable ThreadLocal(TTL) 📌
+# 📌 Transmittable ThreadLocal(TTL) (For akka)📌
 
 [![Build Status](https://travis-ci.org/alibaba/transmittable-thread-local.svg?branch=master)](https://travis-ci.org/alibaba/transmittable-thread-local)
 [![Windows Build Status](https://img.shields.io/appveyor/ci/oldratlee/transmittable-thread-local/master.svg?label=windows%20build)](https://ci.appveyor.com/project/oldratlee/transmittable-thread-local)
