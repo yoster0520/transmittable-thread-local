@@ -49,9 +49,13 @@ public class TtlMailboxTransformlet implements JavassistTransformlet {
         updateEnqueue(clazz);
         updateDequeue(clazz);
         updateProcessMailbox(clazz);
+        updateCleanUp(clazz);
 
     }
 
+    /**
+     * @see akka.dispatch.Mailbox.enqueue
+     */
     private void updateEnqueue(@NonNull CtClass clazz) throws NotFoundException, CannotCompileException {
         final CtMethod enqueueMethod = clazz.getDeclaredMethod("enqueue");
         final String enqueue_renamed_method_rename = renamedMethodNameByTtl(enqueueMethod);
@@ -63,6 +67,9 @@ public class TtlMailboxTransformlet implements JavassistTransformlet {
         doTryFinallyForMethod(enqueueMethod, enqueue_renamed_method_rename, beforeCode, tryCode, finallyCode);
     }
 
+    /**
+     * @see akka.dispatch.Mailbox.dequeue
+     */
     private void updateDequeue(@NonNull CtClass clazz) throws NotFoundException, CannotCompileException {
         final CtMethod dequeueMethod = clazz.getDeclaredMethod("dequeue");
         final String dequeue_renamed_method_rename = renamedMethodNameByTtl(dequeueMethod);
@@ -81,6 +88,9 @@ public class TtlMailboxTransformlet implements JavassistTransformlet {
         doTryFinallyForMethod(dequeueMethod, dequeue_renamed_method_rename, beforeCode, tryCode, finallyCode);
     }
 
+    /**
+     * @see akka.dispatch.Mailbox.processMailbox
+     */
     private void updateProcessMailbox(@NonNull CtClass clazz) throws NotFoundException, CannotCompileException {
         final CtMethod dequeueMethod = clazz.getDeclaredMethod("processMailbox");
         final String processMailBox_renamed_method_rename = renamedMethodNameByTtl(dequeueMethod);
@@ -92,7 +102,31 @@ public class TtlMailboxTransformlet implements JavassistTransformlet {
 
         final String tryCode = "  " + processMailBox_renamed_method_rename + "($1, $2);\n";
 
-        final String finallyCode = " ";
+        final String finallyCode = "if (" + CURRENT_CAPTURED_FIELD_VALUE + " != null) {\n" +
+            "  com.alibaba.ttl.TransmittableThreadLocal.Transmitter.restore(" + CURRENT_CAPTURED_FIELD_VALUE + ");\n" +
+            "  " + CURRENT_CAPTURED_FIELD_VALUE + " = null;\n" +
+            "}\n";
+
+        doTryFinallyForMethod(dequeueMethod, processMailBox_renamed_method_rename, beforeCode, tryCode, finallyCode);
+    }
+
+    /**
+     * @see akka.dispatch.Mailbox.cleanUp
+     */
+    private void updateCleanUp(@NonNull CtClass clazz) throws NotFoundException, CannotCompileException {
+        final CtMethod dequeueMethod = clazz.getDeclaredMethod("cleanUp");
+        final String processMailBox_renamed_method_rename = renamedMethodNameByTtl(dequeueMethod);
+        //int left, long deadlineNs
+        final String beforeCode = "if (" + CURRENT_CAPTURED_FIELD_VALUE + " != null) {\n" +
+            "  com.alibaba.ttl.TransmittableThreadLocal.Transmitter.restore(" + CURRENT_CAPTURED_FIELD_VALUE + ");\n" +
+            "  " + CURRENT_CAPTURED_FIELD_VALUE + " = null;\n" +
+            "}\n";
+
+        final String tryCode = "  " + processMailBox_renamed_method_rename + "();\n";
+
+        final String finallyCode = "if (!" + CAPTURED_FIELD_NAME + ".isEmpty()) {\n" +
+            "  " + CAPTURED_FIELD_NAME + ".clear();\n" +
+            "}\n";
 
         doTryFinallyForMethod(dequeueMethod, processMailBox_renamed_method_rename, beforeCode, tryCode, finallyCode);
     }

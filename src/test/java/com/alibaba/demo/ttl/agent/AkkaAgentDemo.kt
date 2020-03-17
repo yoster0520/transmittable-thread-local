@@ -7,8 +7,7 @@ import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
 import com.alibaba.ttl.TransmittableThreadLocal
 
-private val actorSystem: akka.actor.typed.ActorSystem<Command> = akka.actor.typed.ActorSystem.create(Behaviors.setup { context: ActorContext<Command>? -> Accountant(context!!) }, "MainActor")
-    .logConfiguration()
+private val actorSystem: akka.actor.typed.ActorSystem<Command> = akka.actor.typed.ActorSystem.create(Behaviors.setup { context: ActorContext<Command>? -> Accountant(context!!) }, "MainActor");
 
 fun main() {
     stringTransmittableThreadLocal.set("AAAAAAAAAAAA")
