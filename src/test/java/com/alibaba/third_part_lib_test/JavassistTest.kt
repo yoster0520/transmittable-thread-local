@@ -72,7 +72,7 @@ class JavassistTest {
     }
 }
 
-private interface Supplier {
+public interface Supplier {
     fun get(): Int
 }
 

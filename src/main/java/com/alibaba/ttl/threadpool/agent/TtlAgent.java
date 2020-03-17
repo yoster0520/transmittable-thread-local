@@ -4,10 +4,11 @@ import com.alibaba.ttl.threadpool.agent.internal.logging.Logger;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.JavassistTransformlet;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlExecutorTransformlet;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlForkJoinTransformlet;
+import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlMailboxTransformlet;
 import com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlTimerTaskTransformlet;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -136,6 +137,7 @@ public final class TtlAgent {
             final List<JavassistTransformlet> transformletList = new ArrayList<JavassistTransformlet>();
             transformletList.add(new TtlExecutorTransformlet(disableInheritableForThreadPool));
             transformletList.add(new TtlForkJoinTransformlet(disableInheritableForThreadPool));
+            transformletList.add(new TtlMailboxTransformlet());
             if (isEnableTimerTask()) transformletList.add(new TtlTimerTaskTransformlet());
 
             final ClassFileTransformer transformer = new TtlTransformer(transformletList);
